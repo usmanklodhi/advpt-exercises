@@ -1,5 +1,4 @@
-#ifndef RANGE_H
-#define RANGE_H
+#pragma once
 
 int sum_range(int start, int end) {
     int sum = 0;
@@ -8,5 +7,3 @@ int sum_range(int start, int end) {
     }
     return sum;
 }
-
-#endif //RANGE_H

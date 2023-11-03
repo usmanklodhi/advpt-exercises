@@ -1,5 +1,4 @@
-#ifndef FACTORIAL_H
-#define FACTORIAL_H
+#pragma once
 
 #include <iostream>
 #include <cmath>
@@ -15,5 +14,3 @@ double factorial(int n) {
     }
     return result;
 }
-
-#endif //FACTORIAL_H

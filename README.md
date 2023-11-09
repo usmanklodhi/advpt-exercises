@@ -19,4 +19,4 @@ To contribute to this repository, follow these steps:
 2. **Clone Your Fork:** Clone your fork to your local development environment:
 
    ```bash
-   git clone https://gitlab.cs.fau.de/your-username/advpt-exercises.git
+   git clone https://github.com/your-username/advpt-exercises.git

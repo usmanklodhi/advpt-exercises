@@ -131,13 +131,42 @@ size_t Tensor<ComponentType>::numElements() const {
     return num;
 }
 
+template <Arithmetic ComponentType>
+const ComponentType& Tensor<ComponentType>::operator()(const std::vector<size_t>& idx) const {
+    size_t index = 0;
+    for (size_t i = 0; i < idx.size(); i++) {
+        index += idx[i];
+        if (i != idx.size() - 1) {
+            index *= shape_[i + 1];
+        }
+    }
+    return data_[index];
+}
+
+template <Arithmetic ComponentType>
+ComponentType& Tensor<ComponentType>::operator()(const std::vector<size_t>& idx) {
+    size_t index = 0;
+    for (size_t i = 0; i < idx.size(); i++) {
+        index += idx[i];
+        if (i != idx.size() - 1) {
+            index *= shape_[i + 1];
+        }
+    }
+    return data_[index];
+}
 
 // Returns true if the shapes and all elements of both tensors are equal.
 template< Arithmetic ComponentType >
-bool operator==(const Tensor< ComponentType >& a, const Tensor< ComponentType >& b)
-{
-    // TODO: Implement this comparison.
-
+bool operator==(const Tensor< ComponentType >& a, const Tensor< ComponentType >& b) {
+    if (a.shape() != b.shape()) {
+        return false;
+    }
+    for (size_t i = 0; i < a.numElements(); i++) {
+        if (a.data_[i] != b.data_[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // Pretty-prints the tensor to stdout.

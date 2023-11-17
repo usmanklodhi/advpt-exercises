@@ -88,7 +88,6 @@ template <Arithmetic ComponentType>
 Tensor<ComponentType>::Tensor(const std::vector<size_t> &shape, const ComponentType &fillValue)
 {
     shape_ = shape;
-    // Fill data_ with fillValue
     data_ = std::vector<ComponentType>(numElements(), fillValue);
 }
 

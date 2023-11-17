@@ -59,10 +59,77 @@ public:
 
 private:
     // TODO: Probably you need some members here...
-
+    std::vector<size_t> shape_;  // Represents the shape of the tensor
+    std::vector<ComponentType> data_;  // Represents the tensor's elements
 };
 
 // TODO: Implement all methods of the Tensor class template.
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::Tensor() {
+    shape_ = std::vector<size_t>();
+    data_ = std::vector<ComponentType>();
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::Tensor(const std::vector<size_t>& shape) {
+    shape_ = shape;
+    data_ = std::vector<ComponentType>(numElements(), 0);
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::Tensor(const std::vector<size_t>& shape, const ComponentType& fillValue) {
+    shape_ = shape;
+    data_ = std::vector<ComponentType>(numElements(), fillValue);
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::Tensor(const Tensor<ComponentType>& other) {
+    shape_ = other.shape_;
+    data_ = other.data_;
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::Tensor(Tensor<ComponentType>&& other) noexcept {
+    shape_ = std::move(other.shape_);
+    data_ = std::move(other.data_);
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>::~Tensor() = default;
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>& Tensor<ComponentType>::operator=(const Tensor<ComponentType>& other) {
+    shape_ = other.shape_;
+    data_ = other.data_;
+    return *this;
+}
+
+template <Arithmetic ComponentType>
+Tensor<ComponentType>& Tensor<ComponentType>::operator=(Tensor<ComponentType>&& other) noexcept {
+    shape_ = std::move(other.shape_);
+    data_ = std::move(other.data_);
+    return *this;
+}
+
+template <Arithmetic ComponentType>
+size_t Tensor<ComponentType>::rank() const {
+    return shape_.size();
+}
+
+template <Arithmetic ComponentType>
+std::vector<size_t> Tensor<ComponentType>::shape() const {
+    return shape_;
+}
+
+template <Arithmetic ComponentType>
+size_t Tensor<ComponentType>::numElements() const {
+    size_t num = 1;
+    for (size_t i = 0; i < shape_.size(); i++) {
+        num *= shape_[i];
+    }
+    return num;
+}
 
 
 // Returns true if the shapes and all elements of both tensors are equal.

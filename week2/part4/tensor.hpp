@@ -4,6 +4,8 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <fstream>
+#include <string>
 
 
 
@@ -58,12 +60,9 @@ public:
     operator()(const std::vector< size_t >& idx);
 
 private:
-    // TODO: Probably you need some members here...
     std::vector<size_t> shape_;  // Represents the shape of the tensor
     std::vector<ComponentType> data_;  // Represents the tensor's elements
 };
-
-// TODO: Implement all methods of the Tensor class template.
 
 template <Arithmetic ComponentType>
 Tensor<ComponentType>::Tensor() {
@@ -173,26 +172,95 @@ bool operator==(const Tensor< ComponentType >& a, const Tensor< ComponentType >&
 // This is not necessary (and not covered by the tests) but nice to have, also for debugging (and for exercise of course...).
 template< Arithmetic ComponentType >
 std::ostream&
-operator<<(std::ostream& out, const Tensor< ComponentType >& tensor)
-{
-    // TODO (optional): Implement some nice stdout printer for debugging/exercise.
+operator<<(std::ostream& out, const Tensor< ComponentType >& tensor) {
+    const std::vector<size_t>& shape = tensor.shape();
+    size_t rank = tensor.rank();
 
+    // Print the rank and shape
+    out << "Rank: " << rank << ", Shape: [";
+    for (size_t i = 0; i < rank; ++i) {
+        out << shape[i];
+        if (i < rank - 1) {
+            out << ", ";
+        }
+    }
+    out << "]" << std::endl;
+
+    // Print the tensor elements
+    out << "Tensor Elements:" << std::endl;
+    for (size_t i = 0; i < shape[0]; ++i) {
+        for (size_t j = 0; j < shape[1]; ++j) {
+            for (size_t k = 0; k < shape[2]; ++k) {
+                // Assuming a 3D tensor, adjust as needed for other ranks
+                out << "Tensor[" << i << "][" << j << "][" << k << "] = " << tensor({i, j, k}) << std::endl;
+            }
+        }
+    }
+
+    return out;
 }
 
 // Reads a tensor from file.
 template< Arithmetic ComponentType >
-Tensor< ComponentType > readTensorFromFile(const std::string& filename)
-{
-    // TODO: Implement this function to read in tensors from file.
-    //       The format is defined in the instructions.
+Tensor< ComponentType > readTensorFromFile(const std::string& filename) {
+    // Open the file in binary mode for reading
+    std::ifstream inFile(filename, std::ios::binary);
 
+    if (!inFile.is_open()) {
+        // Handle error: unable to open the file
+        std::cerr << "Error: Unable to open file for reading." << std::endl;
+        // Return an empty tensor or throw an exception based on your error handling strategy
+        return Tensor< ComponentType >();
+    }
+
+    // Read the rank of the tensor from the file
+    size_t rank;
+    inFile.read(reinterpret_cast<char*>(&rank), sizeof(size_t));
+
+    // Read the shape of the tensor from the file
+    std::vector<size_t> shape(rank);
+    inFile.read(reinterpret_cast<char*>(shape.data()), rank * sizeof(size_t));
+
+    // Read the tensor elements from the file
+    size_t numElements = 1;
+    for (size_t dim : shape) {
+        numElements *= dim;
+    }
+
+    std::vector<ComponentType> data(numElements);
+    inFile.read(reinterpret_cast<char*>(data.data()), numElements * sizeof(ComponentType));
+
+    // Close the file
+    inFile.close();
+
+    // Create and return the tensor
+    return Tensor< ComponentType >(shape, data);
 }
 
 // Writes a tensor to file.
 template< Arithmetic ComponentType >
-void writeTensorToFile(const Tensor< ComponentType >& tensor, const std::string& filename)
-{
-    // TODO: Implement this function to write tensors to file.
-    //       The format is defined in the instructions.
+void writeTensorToFile(const Tensor< ComponentType >& tensor, const std::string& filename) {
+    // Open the file in binary mode for writing
+    std::ofstream outFile(filename, std::ios::binary);
 
+    if (!outFile.is_open()) {
+        // Handle error: unable to open the file
+        std::cerr << "Error: Unable to open file for writing." << std::endl;
+        return;
+    }
+
+    // Write the rank of the tensor to the file
+    size_t rank = tensor.rank();
+    outFile.write(reinterpret_cast<const char*>(&rank), sizeof(size_t));
+
+    // Write the shape of the tensor to the file
+    const std::vector<size_t>& shape = tensor.shape();
+    outFile.write(reinterpret_cast<const char*>(shape.data()), rank * sizeof(size_t));
+
+    // Write the tensor elements to the file
+    const std::vector<ComponentType>& data = tensor.getData();
+    outFile.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(ComponentType));
+
+    // Close the file
+    outFile.close();
 }

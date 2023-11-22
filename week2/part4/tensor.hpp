@@ -71,7 +71,7 @@ private:
 };
 
 template <Arithmetic ComponentType>
-Tensor<ComponentType>::Tensor() : shape_(1), data_(numElements(), 0)
+Tensor<ComponentType>::Tensor() : shape_({}), data_(1, 0)
 {
     // Set shape to an empty vector, indicating rank 0
     // Set data_ with a single, zero-initialized entry
@@ -240,11 +240,12 @@ operator<<(std::ostream &out, const Tensor<ComponentType> &tensor)
 }
 
 // Reads a tensor from file.
-template <Arithmetic ComponentType>
-Tensor<ComponentType> readTensorFromFile(const std::string& filename)
-{
+//template <Arithmetic ComponentType>
+//Tensor<ComponentType> readTensorFromFile(const std::string& filename)
+//{
     // TODO: Implement this function
-}
+//    std::ifstream 
+//}
 
 // This is WIP, not yet working
 // Explanation (UKL): The function doesn't write anything to the file, but it doesn't throw any errors either.

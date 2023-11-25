@@ -61,7 +61,7 @@ void test_access(std::vector< std::pair< bool, std::string > >& results)
     results.push_back({a({}) == 444, "test_constructor: correct access rank 0"});
 }
 
-/*
+
 void test_fileio(std::vector< std::pair< bool, std::string > >& results)
 {
     auto a = readTensorFromFile< int >("data/tensor_01");
@@ -97,7 +97,7 @@ void test_fileio(std::vector< std::pair< bool, std::string > >& results)
 
     results.push_back({c == d, "test_io: tensor read/write correct"});
 }
-*/
+
 int main()
 {
     std::vector< std::pair< bool, std::string > > results;
@@ -105,7 +105,7 @@ int main()
     test_constructor(results);
     test_move(results);
     test_access(results);
-    //test_fileio(results);
+    test_fileio(results);
 
     size_t passed = 0;
     for (auto [condition, msg] : results)

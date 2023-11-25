@@ -3,4 +3,4 @@
 .vs/
 .DS_Store
 build/
-week2/part4/CMakeFiles/
+**/CMakeFiles/

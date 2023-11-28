@@ -71,7 +71,7 @@ private:
 };
 
 template <Arithmetic ComponentType>
-Tensor<ComponentType>::Tensor() : shape_(1), data_(numElements(), 0)
+Tensor<ComponentType>::Tensor() : shape_({}), data_(1, 0)
 {
     // Set shape to an empty vector, indicating rank 0
     // Set data_ with a single, zero-initialized entry
@@ -239,11 +239,46 @@ operator<<(std::ostream &out, const Tensor<ComponentType> &tensor)
     return out;
 }
 
-// Reads a tensor from file.
+//Reads a tensor from file.
 template <Arithmetic ComponentType>
 Tensor<ComponentType> readTensorFromFile(const std::string& filename)
 {
+    Tensor<ComponentType> tensor;
     // TODO: Implement this function
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open()){
+        std::string line;
+        if(std::getline(inputFile,line)){
+            size_t rank=std::stoi(line);
+            std::vector<size_t> shape(rank,0);
+            size_t i=0;
+            while(i<rank){
+                std::getline(inputFile,line);
+                shape[i]=std::stoi(line);
+                i++;
+            }
+            tensor.setShape(shape);
+            //read elements from file
+            size_t totalElements=tensor.numElements();
+            std::vector<size_t> index(tensor.rank(),0);
+            for (size_t i = 0; i < totalElements; ++i) {
+                std::getline(inputFile,line);
+                tensor(index)=std::stoi(line);
+                // Move to the next index
+                for (size_t j = tensor.rank(); j-- > 0;) {
+                    if (++index[j] < tensor.shape()[j]) {
+                        break;
+                    }
+                    index[j] = 0;
+                }
+            }
+        }
+        inputFile.close();
+    }else{
+        // Handle error: unable to open the file
+        std::cerr << "Error: Unable to open file for writing: " << filename << std::endl;
+    }
+    return tensor;
 }
 
 // This is WIP, not yet working
@@ -253,42 +288,37 @@ template <Arithmetic ComponentType>
 void writeTensorToFile(const Tensor<ComponentType>& tensor, const std::string& filename)
 {
     // Open the file in binary mode for writing
-    std::ofstream outFile(filename, std::ios::binary);
+    std::ofstream outFile(filename);
 
-    if (!outFile.is_open())
+    if (outFile.is_open())
+    {
+        // Write the rank of the tensor to the file
+        size_t rank = tensor.rank();
+        outFile<<rank<<"\n";
+
+        // Write the shape of the tensor to the file
+        for(const auto& s : tensor.shape()){
+            outFile<<s<<"\n";
+        }
+
+        // Write the tensor elements to the file
+        std::vector<size_t> index(tensor.rank(),0);
+        for (size_t i = 0; i < tensor.numElements(); ++i) {
+            outFile<<tensor(index)<<"\n";
+            // Move to the next index
+            for (size_t j = tensor.rank(); j-- > 0;) {
+                if (++index[j] < tensor.shape()[j]) {
+                    break;
+                }
+                index[j] = 0;
+            }
+        }
+        outFile.close();
+    }
+    else
     {
         // Handle error: unable to open the file
         std::cerr << "Error: Unable to open file for writing: " << filename << std::endl;
         return;
     }
-
-    // Write the rank of the tensor to the file
-    size_t rank = tensor.rank();
-    outFile.write(reinterpret_cast<const char*>(&rank), sizeof(size_t));
-    if (outFile.fail()) {
-        std::cerr << "Error: Failed to write rank to the file." << std::endl;
-        outFile.close();  // Close the file before returning
-        return;
-    }
-
-    // Write the shape of the tensor to the file
-    const std::vector<size_t> &shape = tensor.shape();
-    outFile.write(reinterpret_cast<const char *>(shape.data()), rank * sizeof(size_t));
-    if (outFile.fail()) {
-        std::cerr << "Error: Failed to write shape to the file." << std::endl;
-        outFile.close();  // Close the file before returning
-        return;
-    }
-
-    // Write the tensor elements to the file
-    const std::vector<ComponentType> &data = tensor.getData();
-    outFile.write(reinterpret_cast<const char *>(data.data()), data.size() * sizeof(ComponentType));
-    if (outFile.fail()) {
-        std::cerr << "Error: Failed to write tensor elements to the file." << std::endl;
-        outFile.close();  // Close the file before returning
-        return;
-    }
-
-    // Close the file
-    outFile.close();
 }

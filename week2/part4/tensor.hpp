@@ -207,32 +207,25 @@ template <Arithmetic ComponentType>
 std::ostream &
 operator<<(std::ostream &out, const Tensor<ComponentType> &tensor)
 {
-    const std::vector<size_t> &shape = tensor.shape();
+    // Write the rank of the tensor to output stream
     size_t rank = tensor.rank();
+    out<<rank<<"\n";
 
-    // Print the rank and shape
-    out << "Rank: " << rank << ", Shape: [";
-    for (size_t i = 0; i < rank; ++i)
-    {
-        out << shape[i];
-        if (i < rank - 1)
-        {
-            out << ", ";
-        }
+    // Write the shape of the tensor to output stream
+    for(const auto& s : tensor.shape()){
+        out<<s<<"\n";
     }
-    out << "]" << std::endl;
 
-    // Print the tensor elements
-    out << "Tensor Elements:" << std::endl;
-    for (size_t i = 0; i < shape[0]; ++i)
-    {
-        for (size_t j = 0; j < shape[1]; ++j)
-        {
-            for (size_t k = 0; k < shape[2]; ++k)
-            {
-                // Assuming a 3D tensor, adjust as needed for other ranks
-                out << "Tensor[" << i << "][" << j << "][" << k << "] = " << tensor({i, j, k}) << std::endl;
+    // Write the tensor elements to output stream
+    std::vector<size_t> index(tensor.rank(),0);
+    for (size_t i = 0; i < tensor.numElements(); ++i) {
+        out<<tensor(index)<<"\n";
+        // Move to the next index
+        for (size_t j = tensor.rank(); j-- > 0;) {
+            if (++index[j] < tensor.shape()[j]) {
+                break;
             }
+            index[j] = 0;
         }
     }
 
@@ -273,11 +266,11 @@ Tensor<ComponentType> readTensorFromFile(const std::string& filename)
                 }
             }
         }
-        inputFile.close();
     }else{
         // Handle error: unable to open the file
         std::cerr << "Error: Unable to open file for writing: " << filename << std::endl;
     }
+    inputFile.close();
     return tensor;
 }
 

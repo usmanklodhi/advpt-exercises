@@ -61,6 +61,7 @@ void test_access(std::vector< std::pair< bool, std::string > >& results)
     results.push_back({a({}) == 444, "test_constructor: correct access rank 0"});
 }
 
+
 void test_fileio(std::vector< std::pair< bool, std::string > >& results)
 {
     auto a = readTensorFromFile< int >("data/tensor_01");

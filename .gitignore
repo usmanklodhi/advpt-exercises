@@ -1,4 +1,6 @@
 *.exe
 .vscode/
+.vs/
 .DS_Store
 build/
+**/CMakeFiles/

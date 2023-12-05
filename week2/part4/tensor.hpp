@@ -103,6 +103,8 @@ Tensor<ComponentType>::Tensor(Tensor<ComponentType> &&other) noexcept
 {
     shape_ = std::move(other.shape_);
     data_ = std::move(other.data_);
+    other.shape_ = {};
+    other.data_ = {0};
 }
 
 template <Arithmetic ComponentType>
@@ -180,10 +182,6 @@ template <Arithmetic ComponentType>
 bool operator==(const Tensor<ComponentType> &a, const Tensor<ComponentType> &b)
 {
     // Check if either of the tensors is empty
-    if ( a.getShape().empty() || b.getShape().empty() )
-    {
-        return false;
-    }
     if (a.shape() != b.shape())
     {
         return false;
@@ -204,8 +202,7 @@ bool operator==(const Tensor<ComponentType> &a, const Tensor<ComponentType> &b)
 // Pretty-prints the tensor to stdout.
 // This is not necessary (and not covered by the tests) but nice to have, also for debugging (and for exercise of course...).
 template <Arithmetic ComponentType>
-std::ostream &
-operator<<(std::ostream &out, const Tensor<ComponentType> &tensor)
+std::ostream & operator<<(std::ostream &out, const Tensor<ComponentType> &tensor)
 {
     // Write the rank of the tensor to output stream
     size_t rank = tensor.rank();

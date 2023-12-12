@@ -153,14 +153,14 @@ size_t Tensor<ComponentType>::numElements() const
 template <Arithmetic ComponentType>
 const ComponentType &Tensor<ComponentType>::operator()(const std::vector<size_t> &idx) const
 {
-    size_t index = 0;
-    for (size_t i = 0; i < idx.size(); i++)
+    int index = 0;
+    for (size_t i = 0; i <idx.size() ; ++i)
     {
-        index += idx[i];
-        if (i != idx.size() - 1)
-        {
-            index *= shape_[i + 1];
+        int product=idx[i];
+        for(size_t j=i+1;j<idx.size();j++){
+            product *= shape_[j];
         }
+        index += product;
     }
     return data_[index];
 }
@@ -168,11 +168,14 @@ const ComponentType &Tensor<ComponentType>::operator()(const std::vector<size_t>
 template <Arithmetic ComponentType>
 ComponentType& Tensor<ComponentType>::operator()(const std::vector<size_t>& idx)
 {
-    size_t index = 0;
-    for (size_t i = 0; i < idx.size(); i++)
+    int index = 0;
+    for (size_t i = 0; i <idx.size() ; ++i)
     {
-        index *= shape_[i]; // Multiply before adding
-        index += idx[i];    // Add the current index
+        int product=idx[i];
+        for(size_t j=i+1;j<idx.size();j++){
+            product *= shape_[j];
+        }
+        index += product;
     }
     return data_[index];
 }
@@ -218,7 +221,7 @@ std::ostream & operator<<(std::ostream &out, const Tensor<ComponentType> &tensor
     for (size_t i = 0; i < tensor.numElements(); ++i) {
         out<<tensor(index)<<"\n";
         // Move to the next index
-        for (size_t j = tensor.rank(); j-- > 0;) {
+        for (int j = tensor.rank()-1; j >= 0;j--) {
             if (++index[j] < tensor.shape()[j]) {
                 break;
             }
@@ -233,29 +236,29 @@ std::ostream & operator<<(std::ostream &out, const Tensor<ComponentType> &tensor
 template <Arithmetic ComponentType>
 Tensor<ComponentType> readTensorFromFile(const std::string& filename)
 {
-    Tensor<ComponentType> tensor;
     // TODO: Implement this function
+    Tensor<ComponentType> tensor;
     std::ifstream inputFile(filename);
     if (inputFile.is_open()){
         std::string line;
         if(std::getline(inputFile,line)){
-            size_t rank=std::stoi(line);
+            int rank=std::stoi(line);
             std::vector<size_t> shape(rank,0);
-            size_t i=0;
+            int i=0;
             while(i<rank){
                 std::getline(inputFile,line);
                 shape[i]=std::stoi(line);
                 i++;
             }
             tensor.setShape(shape);
+            tensor.setData(std::vector<ComponentType>(tensor.numElements(), 0));
             //read elements from file
-            size_t totalElements=tensor.numElements();
+            int totalElements=tensor.numElements();
             std::vector<size_t> index(tensor.rank(),0);
-            for (size_t i = 0; i < totalElements; ++i) {
+            for (int i = 0; i < totalElements; ++i) {
                 std::getline(inputFile,line);
                 tensor(index)=std::stoi(line);
-                // Move to the next index
-                for (size_t j = tensor.rank(); j-- > 0;) {
+                for (int j = tensor.rank()-1; j >= 0;j--) {
                     if (++index[j] < tensor.shape()[j]) {
                         break;
                     }
@@ -265,7 +268,7 @@ Tensor<ComponentType> readTensorFromFile(const std::string& filename)
         }
     }else{
         // Handle error: unable to open the file
-        std::cerr << "Error: Unable to open file for writing: " << filename << std::endl;
+        std::cerr << "Error: Unable to open file for reading: " << filename << std::endl;
     }
     inputFile.close();
     return tensor;
@@ -296,7 +299,7 @@ void writeTensorToFile(const Tensor<ComponentType>& tensor, const std::string& f
         for (size_t i = 0; i < tensor.numElements(); ++i) {
             outFile<<tensor(index)<<"\n";
             // Move to the next index
-            for (size_t j = tensor.rank(); j-- > 0;) {
+            for (int j = tensor.rank()-1; j >= 0;j--) {
                 if (++index[j] < tensor.shape()[j]) {
                     break;
                 }
